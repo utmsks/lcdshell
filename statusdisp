@@ -1,0 +1,41 @@
+#! /bin/bash
+
+PORT=53484
+
+function usage()
+{
+	echo "usage: $0 on|off" 1>&2
+}
+
+# clock display
+FUNCTION='\x02'
+
+function cmd()
+{
+	echo -e -n '\x02''\x10'
+	echo -e -n "SONY"
+	echo -e -n '\x00''\xF1''\x00'
+	echo -e -n '\x06'
+	echo -e -n '\x8C''\x00'
+	echo -e -n $FUNCTION
+	echo -e -n '\x02'
+	echo -e -n $SWITCH
+	echo -e -n $CHECKSUM
+}
+
+function doit()
+{
+	cmd | nc $1 $PORT > /dev/null &
+}
+
+case "$1" in
+on)	SWITCH='\x00'; CHECKSUM='\x90';;
+off)	SWITCH='\x01'; CHECKSUM='\x91';;
+*)	usage; exit 1;;
+esac
+
+doit 192.168.1.41
+doit 192.168.1.42
+doit 192.168.1.43
+doit 192.168.1.44
+doit 192.168.1.45

@@ -1,0 +1,42 @@
+#! /bin/bash
+
+NC=/bin/nc
+PORT=53484
+
+function usage()
+{
+	echo "usage: $0 on|off" 1>&2
+}
+
+# power
+FUNCTION='\x00'
+
+function cmd()
+{
+	echo -e -n '\x02''\x10'
+	echo -e -n "SONY"
+	echo -e -n '\x00''\xF1''\x00'
+	echo -e -n '\x06'
+	echo -e -n '\x8C''\x00'
+	echo -e -n $FUNCTION
+	echo -e -n '\x02'
+	echo -e -n $SWITCH
+	echo -e -n $CHECKSUM
+}
+
+function doit()
+{
+	cmd | $NC $1 $PORT > /dev/null &
+}
+
+case "$1" in
+on)	SWITCH='\x01'; CHECKSUM='\x8F';;
+off)	SWITCH='\x00'; CHECKSUM='\x8E';;
+*)	usage; exit 1;;
+esac
+
+doit 192.168.1.41
+doit 192.168.1.42
+doit 192.168.1.43
+doit 192.168.1.44
+doit 192.168.1.45
